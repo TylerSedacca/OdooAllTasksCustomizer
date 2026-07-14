@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Odoo All Tasks Customizer
 // @namespace    tyler.odoo
-// @version      2.2
-// @description  Manual column widths, automatic group expansion, and persistent custom group colors
+// @version      2.3
+// @description  Manual column widths, automatic group expansion, persistent custom group colors, & cell-level color overrides
 // @match        https://the-sign-brothers.odoo.com/odoo/all-tasks*
 // @grant        none
 // @run-at       document-idle
@@ -66,8 +66,24 @@
      * group's row color. Add more entries here any time.
      */
     const CELL_TEXT_OVERRIDES = {
+        // Priority overrides
         "CRITICAL": { background: "#8b0000", text: "#ffffff" },
-        "HIGH": { background: "#ffb3b3", text: "#111111" }
+        "HIGH": { background: "#ffb3b3", text: "#111111" },
+
+        // Designer overrides
+        "BRETT CARSON": { background: "#11306f", text: "#ffffff" },
+        "JAMIE BOQUIST": { background: "#ff5b46", text: "#ffffff" },
+        "CAROLINE FRANK": { background: "#b6fdfe", text: "#111111" },
+        "LINDY VANG": { background: "#b089db", text: "#ffffff" },
+
+        // Status overrides
+        "IN PROGRESS": { background: "#b0dc51", text: "#111111" },
+        "IN QUEUE": { background: "#fdbc64", text: "#111111" },
+        "ON HOLD": { background: "#86b4ca", text: "#ffffff" },
+        "NEEDS REVIEW": { background: "#e8697d", text: "#ffffff" },
+        "STUCK": { background: "#ff7bd0", text: "#ffffff" },
+        "FUTURE": { background: "#797e93", text: "#ffffff" },
+        "PAUSED": { background: "#936fda", text: "#ffffff" }
     };
 
     let scheduled = false;
