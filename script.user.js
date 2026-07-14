@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Odoo All Tasks Customizer
 // @namespace    tyler.odoo
-// @version      2.3
-// @description  Manual column widths, automatic group expansion, persistent custom group colors, & cell-level color overrides
+// @version      2.4
+// @description  Manual column widths, automatic group expansion, persistent custom group colors, cell-level color overrides, & group-specific color defaults
 // @match        https://the-sign-brothers.odoo.com/odoo/all-tasks*
 // @grant        none
 // @run-at       document-idle
@@ -53,12 +53,20 @@
     ];
 
     /*
-     * These colors are only the initial values for groups that have never
-     * been customized. Every group can be changed through the color panel.
+     * Default colors for all groups & specific group overrides.
+     * These are only used the first time a group is encountered.
+     * Once customized, the color panel settings are saved permanently.
      */
     const DEFAULT_HEADER_COLOR = "#d1a91f";
     const DEFAULT_ITEM_COLOR = "#fff0b3";
     const DEFAULT_TEXT_COLOR = "#111111";
+
+    const GROUP_DEFAULTS = {
+        "SIGNATURE PROJECTS": { header: "#FFD766", item: "#FFFFFF", headerText: "#111111", itemText: "#111111" },
+        "QUICK TURNS": { header: "#F6B26B", item: "#FFFFFF", headerText: "#111111", itemText: "#111111" },
+        "PREFLIGHT": { header: "#0BA8DC", item: "#FFFFFF", headerText: "#111111", itemText: "#111111" },
+        "MAIN DESIGN QUEUE": { header: "#93C47D", item: "#FFFFFF", headerText: "#111111", itemText: "#111111" }
+    };
 
     /*
      * Cell-level overrides. If a cell's entire text matches one of these
@@ -552,13 +560,15 @@
         const settings = loadColorSettings();
 
         if (!settings[groupName]) {
-            settings[groupName] = {
+            // Use group-specific defaults if available, otherwise use generic defaults
+            const groupDefault = GROUP_DEFAULTS[groupName] || {
                 header: DEFAULT_HEADER_COLOR,
                 item: DEFAULT_ITEM_COLOR,
                 headerText: DEFAULT_TEXT_COLOR,
                 itemText: DEFAULT_TEXT_COLOR
             };
 
+            settings[groupName] = groupDefault;
             saveColorSettings(settings);
         }
 
@@ -569,12 +579,15 @@
         const settings = loadColorSettings();
 
         if (!settings[groupName]) {
-            settings[groupName] = {
+            // Use group-specific defaults if available, otherwise use generic defaults
+            const groupDefault = GROUP_DEFAULTS[groupName] || {
                 header: DEFAULT_HEADER_COLOR,
                 item: DEFAULT_ITEM_COLOR,
                 headerText: DEFAULT_TEXT_COLOR,
                 itemText: DEFAULT_TEXT_COLOR
             };
+
+            settings[groupName] = groupDefault;
         }
 
         settings[groupName][field] = value;
