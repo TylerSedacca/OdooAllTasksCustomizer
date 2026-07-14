@@ -1,5 +1,3 @@
-Is there any way to have the link first prompt the user to install tapermonkey, allow userappscripts, then install the script?Thought processThought processUnfortunately no. Here's the limitation:
-
 Tampermonkey installation — Users must manually install the extension from their browser's store (Chrome Web Store, Firefox Add-ons, etc.). You can't trigger that from a link.
 Permissions — Browser handles those automatically once the extension is installed.
 Script installation — Only after Tampermonkey exists can the .user.js link trigger the install prompt.
