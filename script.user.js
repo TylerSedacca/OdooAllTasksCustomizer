@@ -734,32 +734,24 @@
         ).filter(isGroupRow);
 
         groupRows.forEach((row) => {
-            // Look for any caret/chevron icon that indicates expand/collapse
-            const caretControl =
-                row.querySelector(".fa-caret-right") ||
-                row.querySelector(".fa-caret-down") ||
-                row.querySelector(".oi-chevron-right") ||
-                row.querySelector(".oi-chevron-down");
+            // Find the clickable element in the group row (usually the first cell)
+            const expandButton =
+                row.querySelector("button[aria-expanded]") ||
+                row.querySelector("td:first-child button") ||
+                row.querySelector("td:first-child");
 
-            if (!caretControl || caretControl.offsetParent === null) {
+            if (!expandButton || expandButton.offsetParent === null) {
                 return;
             }
 
-            // Only click if it's currently showing the "collapsed" icon
-            const isCollapsed = caretControl.classList.contains("fa-caret-right") ||
-                                caretControl.classList.contains("oi-chevron-right");
+            // Check if group is collapsed by looking at aria-expanded or icon
+            const ariaExpanded = expandButton.getAttribute("aria-expanded");
+            const isCurrentlyExpanded = ariaExpanded === "true";
 
-            if (!isCollapsed) {
-                return;
+            // Only click if collapsed
+            if (!isCurrentlyExpanded) {
+                expandButton.click();
             }
-
-            const clickable =
-                caretControl.closest("button") ||
-                caretControl.closest("td") ||
-                caretControl.closest("th") ||
-                caretControl;
-
-            clickable.click();
         });
     }
 
