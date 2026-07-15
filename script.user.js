@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Odoo All Tasks Customizer
 // @namespace    tyler.odoo
-// @version      2.4
-// @description  Manual column widths, automatic group expansion, persistent custom group colors, cell-level color overrides, & group-specific color defaults
+// @version      2.5
+// @description  Manual column widths, automatic group expansion on load, persistent custom group colors, cell-level color overrides, & group-specific color defaults
 // @match        https://the-sign-brothers.odoo.com/odoo/all-tasks*
 // @grant        none
 // @run-at       document-idle
@@ -105,6 +105,13 @@
      * from being closed underneath you.
      */
     let renderedGroupKey = null;
+
+    /*
+     * Track the last URL where groups were expanded.
+     * Groups only expand on initial load/page navigation,
+     * not on DOM mutations after that.
+     */
+    let lastUrlWhenExpanded = null;
 
     function isTargetPage() {
         return window.location.pathname.startsWith("/odoo/all-tasks");
@@ -980,31 +987,51 @@
 
         clearTimeout(expansionTimer);
 
-        expansionTimer = setTimeout(() => {
-            const currentTable = getTable();
+        /*
+         * Only expand groups if this is a new page/URL.
+         * Once expanded for a URL, don't expand again even if the DOM updates.
+         */
+        const currentUrl = window.location.href;
 
-            if (!currentTable) {
-                return;
-            }
+        if (lastUrlWhenExpanded !== currentUrl) {
+            expansionTimer = setTimeout(() => {
+                const currentTable = getTable();
 
-            expandAllGroups(currentTable);
-
-            setTimeout(() => {
-                const refreshedTable = getTable();
-
-                if (!refreshedTable) {
+                if (!currentTable) {
                     return;
                 }
 
-                const headers = getHeaderCells(refreshedTable);
-                const widths = loadSavedWidths(headers.length);
+                expandAllGroups(currentTable);
 
-                applyWidths(refreshedTable, widths);
-                addColumnResizers(refreshedTable);
-                applyRowColors(refreshedTable);
-                refreshOpenColorPanel();
-            }, 300);
-        }, 150);
+                // Mark this URL as having been expanded
+                lastUrlWhenExpanded = currentUrl;
+
+                setTimeout(() => {
+                    const refreshedTable = getTable();
+
+                    if (!refreshedTable) {
+                        return;
+                    }
+
+                    const headers = getHeaderCells(refreshedTable);
+                    const widths = loadSavedWidths(headers.length);
+
+                    applyWidths(refreshedTable, widths);
+                    addColumnResizers(refreshedTable);
+                    applyRowColors(refreshedTable);
+                    refreshOpenColorPanel();
+                }, 300);
+            }, 150);
+        } else {
+            // URL hasn't changed, just apply widths and colors without expanding
+            const headers = getHeaderCells(table);
+            const widths = loadSavedWidths(headers.length);
+
+            applyWidths(table, widths);
+            addColumnResizers(table);
+            applyRowColors(table);
+            refreshOpenColorPanel();
+        }
     }
 
     function scheduleCustomization() {
@@ -1056,6 +1083,7 @@
     window.setInterval(() => {
         if (window.location.href !== previousUrl) {
             previousUrl = window.location.href;
+            lastUrlWhenExpanded = null; // Reset expansion flag on URL change
             scheduleCustomization();
         }
     }, 500);
