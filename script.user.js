@@ -734,20 +734,30 @@
         ).filter(isGroupRow);
 
         groupRows.forEach((row) => {
-            const collapsedControl =
+            // Look for any caret/chevron icon that indicates expand/collapse
+            const caretControl =
                 row.querySelector(".fa-caret-right") ||
+                row.querySelector(".fa-caret-down") ||
                 row.querySelector(".oi-chevron-right") ||
-                row.querySelector('[aria-expanded="false"]');
+                row.querySelector(".oi-chevron-down");
 
-            if (!collapsedControl || collapsedControl.offsetParent === null) {
+            if (!caretControl || caretControl.offsetParent === null) {
+                return;
+            }
+
+            // Only click if it's currently showing the "collapsed" icon
+            const isCollapsed = caretControl.classList.contains("fa-caret-right") ||
+                                caretControl.classList.contains("oi-chevron-right");
+
+            if (!isCollapsed) {
                 return;
             }
 
             const clickable =
-                collapsedControl.closest("button") ||
-                collapsedControl.closest("td") ||
-                collapsedControl.closest("th") ||
-                collapsedControl;
+                caretControl.closest("button") ||
+                caretControl.closest("td") ||
+                caretControl.closest("th") ||
+                caretControl;
 
             clickable.click();
         });
