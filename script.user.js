@@ -733,26 +733,29 @@
             table.querySelectorAll("tbody tr")
         ).filter(isGroupRow);
 
-        groupRows.forEach((row) => {
-            // Find the clickable element in the group row (usually the first cell)
-            const expandButton =
-                row.querySelector("button[aria-expanded]") ||
-                row.querySelector("td:first-child button") ||
-                row.querySelector("td:first-child");
+        let expandedAny = false;
 
-            if (!expandButton || expandButton.offsetParent === null) {
+        groupRows.forEach((row) => {
+            const collapsedControl =
+                row.querySelector(".fa-caret-right") ||
+                row.querySelector(".oi-chevron-right") ||
+                row.querySelector('[aria-expanded="false"]');
+
+            if (!collapsedControl || collapsedControl.offsetParent === null) {
                 return;
             }
 
-            // Check if group is collapsed by looking at aria-expanded or icon
-            const ariaExpanded = expandButton.getAttribute("aria-expanded");
-            const isCurrentlyExpanded = ariaExpanded === "true";
+            const clickable =
+                collapsedControl.closest("button") ||
+                collapsedControl.closest("td") ||
+                collapsedControl.closest("th") ||
+                collapsedControl;
 
-            // Only click if collapsed
-            if (!isCurrentlyExpanded) {
-                expandButton.click();
-            }
+            clickable.click();
+            expandedAny = true;
         });
+
+        return expandedAny;
     }
 
     function createButton(text, clickHandler) {
@@ -996,9 +999,6 @@
         const currentUrl = window.location.href;
 
         if (lastUrlWhenExpanded !== currentUrl) {
-            // Mark immediately so DOM mutations during expansion won't retrigger it
-            lastUrlWhenExpanded = currentUrl;
-
             expansionTimer = setTimeout(() => {
                 const currentTable = getTable();
 
@@ -1006,7 +1006,12 @@
                     return;
                 }
 
-                expandAllGroups(currentTable);
+                const didExpand = expandAllGroups(currentTable);
+
+                // Only mark as expanded if we actually found and clicked something
+                if (didExpand) {
+                    lastUrlWhenExpanded = currentUrl;
+                }
 
                 setTimeout(() => {
                     const refreshedTable = getTable();
@@ -1025,7 +1030,7 @@
                 }, 300);
             }, 150);
         } else {
-            // URL hasn't changed, just apply widths and colors without expanding
+            // URL hasn't changed & expansion succeeded, just apply widths and colors
             const headers = getHeaderCells(table);
             const widths = loadSavedWidths(headers.length);
 
