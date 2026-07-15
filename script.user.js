@@ -994,6 +994,9 @@
         const currentUrl = window.location.href;
 
         if (lastUrlWhenExpanded !== currentUrl) {
+            // Mark immediately so DOM mutations during expansion won't retrigger it
+            lastUrlWhenExpanded = currentUrl;
+
             expansionTimer = setTimeout(() => {
                 const currentTable = getTable();
 
@@ -1002,9 +1005,6 @@
                 }
 
                 expandAllGroups(currentTable);
-
-                // Mark this URL as having been expanded
-                lastUrlWhenExpanded = currentUrl;
 
                 setTimeout(() => {
                     const refreshedTable = getTable();
